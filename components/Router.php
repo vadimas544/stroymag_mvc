@@ -27,19 +27,33 @@ class Router
 		$uri = $this->getURI();
 		//echo $uri;
 		
+
+
 		//Check in routes and define controller and action
 		foreach($this->routes as $uriPattern => $path){
 			//echo $uriPattern .  $path;
 			if(preg_match("~$uriPattern~", $uri))
 			{
-				$segments = explode('/', $path);
+
+				//Получаем внутренний путь из внешнего согласно правилу
+				$internalRoute = preg_replace("~$uriPattern~", $path, $uri);
+
+
+				$segments = explode('/', $internalRoute);
 				$controllerName = array_shift($segments) . 'Controller';
 				$controllerName = ucfirst($controllerName);
-				echo $controllerName;
+				//echo $controllerName;
 
 				$actionName = 'action' . ucfirst(array_shift($segments));
 
-				echo $actionName; 
+
+				$parameters = $segments;
+				//echo '<pre>';
+				//print_r($parameters);
+
+				//echo $actionName;
+
+
 
 				//connect file controller class
 
@@ -53,8 +67,11 @@ class Router
 				//Create object and call method
 				
 				$controllerObject = new $controllerName;
-				$result = $controllerObject->$actionName();
-				
+				//print_r($controllerObject);
+				//$result = $controllerObject->$actionName($parameters);
+				//var_dump($result);
+				$result = call_user_func_array(array($controllerObject, $actionName), $parameters);
+
 				if($result != null){
 					break;
 				}
